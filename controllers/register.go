@@ -10,6 +10,11 @@ type RegisterConterller struct {
 	beego.Controller
 }
 
+//加载login页面既刷新页面
+func (r *RegisterConterller) Get() {
+	r.TplName = "login.html"
+}
+
 /**
 * 重写一个post的方法来执行注册的操作
 */
@@ -26,7 +31,7 @@ func (r *RegisterConterller) Post() {
 	if err != nil {
 		fmt.Println(err.Error())
 	}
-	fmt.Println("123456")
+
 	//3.加载登录页面
 	r.TplName = "login.html"
 }

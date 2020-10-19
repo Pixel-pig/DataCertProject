@@ -2,8 +2,7 @@ package models
 
 import (
 	"DaraCertProject/db_mysql"
-	"crypto/md5"
-	"encoding/hex"
+	"DaraCertProject/uilt"
 )
 
 type User struct {
@@ -17,9 +16,7 @@ type User struct {
  */
 func (u User) SaveUserInfo() (int64, error) {
 	//1.将密码进行md5脱敏
-	m := md5.New()
-	m.Write([]byte(u.Password))
-	u.Password = hex.EncodeToString(m.Sum(nil))
+	u.Password = uilt.MD5HexToString(u.Password)
 
 	//2.将数据存入数据库中(返回-1则代表错误)
 	sqlStr := "insert into user(userPassword, phone) values(?, ?)"
@@ -37,18 +34,16 @@ func (u User) SaveUserInfo() (int64, error) {
 /**
  *查询数据是否存在
  */
-func (u User) QueryUserInfo() (error) {
+func (u User) QueryUserInfo() (*User, error) {
 	//1.将密码进行脱敏，（密码存入时进行了加密处理）
-	m := md5.New()
-	m.Write([]byte(u.Password))
-	u.Password = hex.EncodeToString(m.Sum(nil))
+	u.Password = uilt.MD5HexToString(u.Password)
 
 	//2.查询数据是否存在
-	sqlStr := "select phone from user where phone = ?, userPassword = ?"
+	sqlStr := "select phone from user where phone = ? and userPassword = ?"
 	row := db_mysql.DB.QueryRow(sqlStr, u.Phone, u.Password)
 	err := row.Scan(&u.Phone)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return &u, nil
 }
